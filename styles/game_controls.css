@@ -116,6 +116,35 @@
 
 
 
+
+/* Полупопап для купола дерева */
+.shield-progress-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-8);
+
+  /* просто для теста, в реальности надо смотреть */
+  margin-top: 42px;
+}
+.progress-line {
+  height: 19px;
+  width: 233px;
+  background: var(--white);
+  outline: 3px solid var(--stravita-blue);
+  border-radius: 3px;
+}
+.progress-line-value {
+  width: 97%;
+  height: 100%;
+  background: var(--stravita-green);
+  border-radius: 3px;
+}
+
+
+
+
 /* popup */
 .popup-overlay {
   position: absolute;
