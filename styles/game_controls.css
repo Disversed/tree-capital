@@ -126,11 +126,15 @@
   background: rgba(128, 128, 128, 0.42);
   backdrop-filter: blur(2px);
 
+  display: none;
+}
+.popup-overlay.is-open {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 25px;
 }
+
 .popup-container {
   width: 100%;
   background: var(--white);
@@ -195,9 +199,4 @@
   text-wrap: nowrap;
 }
 
-.popup-overlay {
-  display: none;
-}
-.popup-overlay.is-open {
-  display: flex; /* подгоните под вашу вёрстку: block / grid */
-}
+
