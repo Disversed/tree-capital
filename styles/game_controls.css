@@ -1,0 +1,114 @@
+@import url(./ui_kit/main.css);
+
+/* весь блок header */
+.main-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  padding-top: 65px;
+  padding-inline: 25px;
+}
+/* правый и левый вложенные блоки header */
+.header-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-16);
+}
+/* Весь блок число + линия прогресса*/
+.header-progress-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+/* число */
+.header-progress-number {
+  background: var(--stravita-blue);
+  padding: 5px;
+  border-radius: 5px;
+}
+/* линия прогресса внешняя */
+.header-progress-line {
+  width: 100px;
+  height: 21px;
+  outline: 3px solid var(--stravita-blue);
+  border-radius: 0 3px 3px 0;
+}
+/* линия прогресса внутренняя заливка */
+.header-progress-line-value {
+  height: 100%;
+  width: 26%;
+  background: var(--stravita-green);
+  border-radius: 0 3px 3px 0;
+}
+/* блок с яблоками */
+.apple-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: var(--gap-10);
+  align-items: center;
+}
+
+
+
+/* сама игра - пока заглушка */
+.canvas {
+  height: 100%;
+  padding-inline: 25px;
+}
+
+
+/* весь блок header */
+.main-footer {
+  position: relative;
+  z-index: 1;
+  height: 165px;
+  padding-inline: 41px;
+  padding-bottom: 34px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+/* белая обводка вокруг кнопки */
+.button-outline-container {
+  width: 131px;
+  height: 131px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--white);
+}
+/* кнопка */
+.round-footer-button {
+  width: 105px;
+  height: 105px;
+  background: var(--stravita-green);
+  border: 2px solid var(--stravita-green);
+  border-radius: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* при нажатии */
+.round-footer-button:active {
+  border: 2px solid var(--stravita-green);
+  background: var(--white);
+}
+/* недоступна */
+.round-footer-button:disabled {
+  opacity: 0.5;
+}
+/* подложка под кнопки */
+.footer-background {
+  width: 100%;
+  height: 100px;
+
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: var(--stravita-coolgray);
+}
