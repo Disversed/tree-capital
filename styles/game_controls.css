@@ -112,3 +112,92 @@
   left: 0;
   background: var(--stravita-coolgray);
 }
+
+
+
+
+/* popup */
+.popup-overlay {
+  position: absolute;
+  z-index: 999;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(128, 128, 128, 0.42);
+  backdrop-filter: blur(2px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 25px;
+}
+.popup-container {
+  width: 100%;
+  background: var(--white);
+  padding: 32px;
+  border-radius: 5px;
+
+  display: flex;
+  flex-direction: column;
+}
+.close-popup-button {
+  background: transparent;
+  border: none;
+  width: 48px;
+  padding: 0;
+  align-self: end;
+
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-16);
+  align-items: center;
+}
+.popup-text-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-8);
+}
+
+.popup-buttons-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: var(--gap-8);
+  margin-top: var(--gap-32);
+}
+.grey-border-button {
+  padding: 10px 40px;
+  background: var(--white);
+  border: 2px solid var(--stravita-gray);
+  color: var(--black);
+  border-radius: 5px;
+}
+.simple-green-button {
+  padding: 10px 20px;
+  background: var(--stravita-green);
+  border: 2px solid var(--stravita-green);
+  color: var(--white);
+  border-radius: 5px;
+}
+
+.icon-button {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gap-8);
+  align-items: center;
+}
+.icon-button span {
+  text-wrap: nowrap;
+}
+
+.popup-overlay {
+  display: none;
+}
+.popup-overlay.is-open {
+  display: flex; /* подгоните под вашу вёрстку: block / grid */
+}
