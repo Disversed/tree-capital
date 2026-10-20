@@ -2,31 +2,69 @@
 @import url(./fonts.css);
 @import url(./variables.css);
 
+/*!* Контейнер-обёртка на весь экран *!*/
+/*#stage {*/
+/*  position: fixed;*/
+/*  inset: 0;                !* top:0; right:0; bottom:0; left:0 *!*/
+/*  display: flex;*/
+/*  align-items: center;      !* центр по вертикали *!*/
+/*  justify-content: center;  !* центр по горизонтали *!*/
+/*  background: #cccccc;*/
+/*}*/
+/*!* Сама "телефонная" игровая область. Вертикальный aspect ratio, например 9: 19.5 *!*/
+/*#game {*/
+/*  position: relative;*/
+/*  aspect-ratio: 9 / 19.5;*/
+/*  !* Ограничиваем по высоте и ширине одновременно, чтобы вписаться в любой экран без обрезки *!*/
+/*  height: 100vh;*/
+/*  max-height: 100vh;*/
+/*  width: auto;*/
+/*  max-width: 100vw;*/
+
+/*  !* Центрируем ещё раз на всякий случай *!*/
+/*  background: var(--white);*/
+/*  overflow: hidden;*/
+
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*}*/
+
 /* Контейнер-обёртка на весь экран */
 #stage {
   position: fixed;
-  inset: 0;                /* top:0; right:0; bottom:0; left:0 */
+  inset: 0;
   display: flex;
-  align-items: center;      /* центр по вертикали */
-  justify-content: center;  /* центр по горизонтали */
-  background: #cccccc;
+  align-items: center;
+  justify-content: center;
+  background: var(--white, #ffffff); /* на телефоне фон не нужен */
 }
-/* Сама "телефонная" игровая область. Вертикальный aspect ratio, например 9: 19.5 */
+
+/* Игровая область */
 #game {
   position: relative;
-  aspect-ratio: 9 / 19.5;
-  /* Ограничиваем по высоте и ширине одновременно, чтобы вписаться в любой экран без обрезки */
-  height: 100vh;
-  max-height: 100vh;
-  width: auto;
-  max-width: 100vw;
-
-  /* Центрируем ещё раз на всякий случай */
-  background: var(--white);
+  background: var(--white, #ffffff);
   overflow: hidden;
-
   display: flex;
   flex-direction: column;
+
+  /* === МОБИЛЬНЫЙ ПО УМОЛЧАНИЮ === */
+  width: 100vw;
+  height: 100dvh;
+}
+
+/* === ПЛАНШЕТ И ДЕСКТОП === */
+@media (min-width: 425px) {
+  #stage {
+    background: #2d2d2d; /* тёмный фон вокруг телефона */
+  }
+
+  #game {
+    width: auto;
+    height: 100dvh;
+    max-height: 100dvh;
+    aspect-ratio: 9 / 19.5;
+    max-width: 100vw;
+  }
 }
 
 
