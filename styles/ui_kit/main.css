@@ -36,24 +36,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--white, #ffffff); /* на телефоне фон не нужен */
+  background: var(--white); /* на телефоне фон не нужен */
 }
 
 /* Игровая область */
 #game {
   position: relative;
-  background: var(--white, #ffffff);
+  background: var(--white);
   overflow: hidden;
   display: flex;
   flex-direction: column;
 
   /* === МОБИЛЬНЫЙ ПО УМОЛЧАНИЮ === */
   width: 100vw;
-  height: 100dvh;
+  height: 100vh;
 }
 
 /* === ПЛАНШЕТ И ДЕСКТОП === */
-@media (min-width: 425px) {
+@media (min-width: 500px) {
   #stage {
     background: #2d2d2d; /* тёмный фон вокруг телефона */
   }
