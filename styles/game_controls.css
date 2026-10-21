@@ -13,29 +13,28 @@
 .header-info-block {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-16);
 }
 /* Весь блок число + линия прогресса*/
-.header-progress-bar {
+.life-info {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 /* число */
-.header-progress-number {
+.header-progress-value {
   background: var(--stravita-blue);
   padding: 5px;
   border-radius: 5px;
 }
 /* линия прогресса внешняя */
-.header-progress-line {
+.header-progress-bar {
   width: 100px;
   height: 21px;
   outline: 3px solid var(--stravita-blue);
   border-radius: 0 3px 3px 0;
 }
 /* линия прогресса внутренняя заливка */
-.header-progress-line-value {
+.header-progress-bar-value-line {
   height: 100%;
   width: 26%;
   background: var(--stravita-green);
@@ -59,11 +58,11 @@
 }
 
 
-/* весь блок header */
+/* весь блок footer */
 .main-footer {
   position: relative;
   z-index: 1;
-  height: 165px;
+  height: min-content;
   padding-inline: 41px;
   padding-bottom: 34px;
   display: flex;
@@ -128,14 +127,13 @@
   /* просто для теста, в реальности надо смотреть */
   margin-top: 42px;
 }
-.progress-line {
-  height: 19px;
+.progress-bar {
   width: 233px;
   background: var(--white);
   outline: 3px solid var(--stravita-blue);
   border-radius: 3px;
 }
-.progress-line-value {
+.progress-bar-value-line {
   width: 97%;
   height: 100%;
   background: var(--stravita-green);
@@ -146,6 +144,7 @@
 
 
 /* popup */
+/* затемнение фона */
 .popup-overlay {
   position: absolute;
   z-index: 999;
@@ -157,13 +156,14 @@
 
   display: none;
 }
+/* состояние - попап открыт */
 .popup-overlay.is-open {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 25px;
 }
-
+/* само окно попапа */
 .popup-container {
   width: 100%;
   background: var(--white);
@@ -173,6 +173,7 @@
   display: flex;
   flex-direction: column;
 }
+/* кнопка крестик - закрыть попап */
 .close-popup-button {
   background: transparent;
   border: none;
@@ -184,18 +185,20 @@
   justify-content: end;
   align-items: center;
 }
+/* информация в попапе */
 .popup-content {
   display: flex;
   flex-direction: column;
   gap: var(--gap-16);
   align-items: center;
 }
+/* текст в попапе */
 .popup-text-container {
   display: flex;
   flex-direction: column;
   gap: var(--gap-8);
 }
-
+/* нижние кнопки в попапе */
 .popup-buttons-container {
   display: flex;
   flex-direction: row;
@@ -203,6 +206,7 @@
   gap: var(--gap-8);
   margin-top: var(--gap-32);
 }
+/* серая кнопка */
 .grey-border-button {
   padding: 10px 40px;
   background: var(--white);
@@ -210,6 +214,7 @@
   color: var(--black);
   border-radius: 5px;
 }
+/* зеленая кнопка */
 .simple-green-button {
   padding: 10px 20px;
   background: var(--stravita-green);
@@ -218,14 +223,107 @@
   border-radius: 5px;
 }
 
+/* доп для кнопок с иконками внутри */
 .icon-button {
   display: flex;
   justify-content: space-between;
   gap: var(--gap-8);
   align-items: center;
 }
+/* текст в кнопках с иконками */
 .icon-button span {
   text-wrap: nowrap;
 }
 
 
+/* очень маленькие телефоны типа iPhone SE */
+@media (min-width: 375px) {
+
+  .main-header {
+    padding-top: 16px;
+    padding-inline: 20px;
+  }
+  /* правый и левый вложенные блоки header */
+  .header-info-block {
+    gap: var(--gap-10);
+  }
+
+
+  /* весь блок footer */
+  .main-footer {
+    padding-inline: 40px;
+    padding-bottom: 16px;
+  }
+  /* белая обводка вокруг кнопки */
+  .button-outline-container {
+    width: 110px;
+    height: 110px;
+  }
+  /* кнопка */
+  .round-footer-button {
+    width: 90px;
+    height: 90px;
+  }
+  /* подложка под кнопки */
+  .footer-background {
+    height: 70px;
+  }
+
+
+
+  /* попапы */
+  .shield-progress-info {
+    /* просто для теста, в реальности надо смотреть */
+    margin-top: 24px;
+  }
+  .progress-bar {
+    height: 16px;
+  }
+
+  /* нижние кнопки в попапе */
+  .popup-buttons-container {
+    flex-direction: column-reverse;
+  }
+  .icon-button {
+    justify-content: center;
+  }
+}
+
+/* обычные телефоны типа iPhone 11 - iPhone 17 не + и не Max */
+@media (min-width: 390px) {
+
+  .main-header {
+    padding-top: 24px;
+  }
+  /* правый и левый вложенные блоки header */
+  .header-info-block {
+    gap: var(--gap-16);
+  }
+
+
+  /* весь блок footer */
+  .main-footer {
+    padding-bottom: 20px;
+  }
+  /* белая обводка вокруг кнопки */
+  .button-outline-container {
+    width: 124px;
+    height: 124px;
+  }
+  /* кнопка */
+  .round-footer-button {
+    width: 104px;
+    height: 104px;
+  }
+  /* подложка под кнопки */
+  .footer-background {
+    height: 84px;
+  }
+
+
+  /* попапы */
+  .progress-bar {
+    height: 20px;
+  }
+
+}
