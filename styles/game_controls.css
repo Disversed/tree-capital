@@ -44,6 +44,7 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  gap: var(--gap-4);
 }
 
 
@@ -66,8 +67,6 @@
 }
 /* белая обводка вокруг кнопки */
 .button-outline-container {
-  width: 131px;
-  height: 131px;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -76,8 +75,6 @@
 }
 /* кнопка */
 .round-footer-button {
-  width: 105px;
-  height: 105px;
   background: var(--stravita-green);
   border: 2px solid var(--stravita-green);
   border-radius: 50%;
@@ -98,7 +95,6 @@
 /* подложка под кнопки */
 .footer-background {
   width: 100%;
-  height: 100px;
 
   position: absolute;
   bottom: 0;
@@ -118,9 +114,6 @@
   flex-direction: column;
   align-items: center;
   gap: var(--gap-8);
-
-  /* просто для теста, в реальности надо смотреть */
-  margin-top: 42px;
 }
 .progress-bar {
   width: 233px;
@@ -146,7 +139,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  background: rgba(128, 128, 128, 0.42);
+  background: rgba(105, 117, 122, 0.34);
   backdrop-filter: blur(2px);
 
   display: none;
@@ -211,7 +204,7 @@
 }
 /* зеленая кнопка */
 .simple-green-button {
-  padding: 10px 20px;
+  padding: 10px 40px;
   background: var(--stravita-green);
   border: 2px solid var(--stravita-green);
   color: var(--white);
@@ -284,11 +277,8 @@
   }
 }
 
-/* очень маленькие телефоны типа iPhone SE */
-@media (min-width: 390px) {
-
-
-
+/* средние телефоны типа iPhone 11 - 17 */
+@media (min-width: 375px) {
 
   /* весь блок footer */
   .main-footer {
@@ -303,6 +293,95 @@
   .round-footer-button {
     width: 90px;
     height: 90px;
+  }
+}
+
+/* большие телефоны типа iPhone Max и Plus */
+@media (min-width: 425px) {
+
+  .main-header {
+    padding-top: 16px;
+    padding-inline: 20px;
+  }
+  /* правый и левый вложенные блоки header */
+  .header-info-block {
+    gap: var(--gap-8);
+  }
+
+
+  /* весь блок footer */
+  .main-footer {
+    padding-inline: 48px;
+    padding-bottom: 16px;
+  }
+  /* белая обводка вокруг кнопки */
+  .button-outline-container {
+    width: 130px;
+    height: 130px;
+  }
+  /* кнопка */
+  .round-footer-button {
+    width: 104px;
+    height: 104px;
+  }
+  /* подложка под кнопки */
+  .footer-background {
+    height: 80px;
+  }
+
+
+
+  /* попапы */
+  .shield-progress-info {
+    /* просто для теста, в реальности надо смотреть */
+    margin-top: var(--gap-16);
+  }
+  .progress-bar {
+    height: 20px;
+  }
+}
+
+/* большие телефоны типа iPhone Max и Plus */
+@media (min-width: 768px) {
+
+  .main-header {
+    padding-top: 16px;
+    padding-inline: 20px;
+  }
+  /* правый и левый вложенные блоки header */
+  .header-info-block {
+    gap: var(--gap-8);
+  }
+
+
+  /* весь блок footer */
+  .main-footer {
+    padding-inline: 28px;
+  }
+  /* белая обводка вокруг кнопки */
+  .button-outline-container {
+    width: 130px;
+    height: 130px;
+  }
+  /* кнопка */
+  .round-footer-button {
+    width: 104px;
+    height: 104px;
+  }
+  /* подложка под кнопки */
+  .footer-background {
+    height: 80px;
+  }
+
+
+
+  /* попапы */
+  .shield-progress-info {
+    /* просто для теста, в реальности надо смотреть */
+    margin-top: var(--gap-16);
+  }
+  .progress-bar {
+    height: 20px;
   }
 }
 
