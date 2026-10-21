@@ -290,25 +290,20 @@
 }
 
 /* обычные телефоны типа iPhone 11 - iPhone 17 не + и не Max */
-@media (min-width: 390px) {
-  /* белая обводка вокруг кнопки */
-  .button-outline-container {
-    width: 120px;
-    height: 120px;
-  }
-  /* кнопка */
-  .round-footer-button {
-    width: 100px;
-    height: 100px;
-  }
-  /* подложка под кнопки */
-  .footer-background {
-    height: 84px;
-  }
+/*@media (min-width: 390px) {*/
+/*  !* белая обводка вокруг кнопки *!*/
+/*  .button-outline-container {*/
+/*    width: 120px;*/
+/*    height: 120px;*/
+/*  }*/
+/*  !* кнопка *!*/
+/*  .round-footer-button {*/
+/*    width: 100px;*/
+/*    height: 100px;*/
+/*  }*/
+/*  !* подложка под кнопки *!*/
+/*  .footer-background {*/
+/*    height: 84px;*/
+/*  }*/
 
-  /* попапы */
-  .progress-bar {
-    height: 16px;
-  }
-
-}
+/*}*/
