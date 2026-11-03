@@ -10,6 +10,7 @@
 .header-info-block {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 /* Весь блок число + линия прогресса*/
 .life-info {
@@ -34,7 +35,7 @@
 /* линия прогресса внутренняя заливка */
 .header-progress-bar-value-line {
   height: 100%;
-  width: 26%;
+  width: 0%;
   background: var(--stravita-green);
   border-radius: 0 3px 3px 0;
 }
@@ -52,7 +53,8 @@
 /* сама игра - пока заглушка */
 .canvas {
   height: 100%;
-  padding-inline: 25px;
+  overflow: hidden;
+  /* padding-inline: 25px; */
 }
 
 
@@ -109,11 +111,17 @@
 
 /* Полупопап для купола дерева */
 .shield-progress-info {
+  position: absolute;
+  z-index: 998;
+  translate: 0 150%;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--gap-8);
+}
+.shield-progress-info.hidden {
+  display: none;
 }
 .progress-bar {
   width: 233px;
@@ -122,7 +130,7 @@
   border-radius: 3px;
 }
 .progress-bar-value-line {
-  width: 97%;
+  width: 100%;
   height: 100%;
   background: var(--stravita-green);
   border-radius: 3px;
@@ -142,14 +150,14 @@
   background: rgba(105, 117, 122, 0.34);
   backdrop-filter: blur(2px);
 
-  display: none;
-}
-/* состояние - попап открыт */
-.popup-overlay.is-open {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 25px;
+}
+/* состояние - попап скрыт */
+.popup-overlay.hidden {
+  display: none;
 }
 /* само окно попапа */
 .popup-container {
@@ -221,6 +229,12 @@
 /* текст в кнопках с иконками */
 .icon-button span {
   text-wrap: nowrap;
+}
+/* иконка в кнопках с иконками */
+.icon-button svg {
+  vertical-align: sub;
+  height: 20px;
+  width: 20px;
 }
 
 
