@@ -92,6 +92,7 @@
 }
 /* недоступна */
 .round-footer-button:disabled {
+  background: var(--stravita-green);
   opacity: 0.5;
 }
 /* подложка под кнопки */
@@ -187,6 +188,11 @@
   flex-direction: column;
   gap: var(--gap-16);
   align-items: center;
+}
+/* основная иконка попапа */
+.popup-content .icon svg {
+  width: 96px;
+  height: 96px;
 }
 /* текст в попапе */
 .popup-text-container {

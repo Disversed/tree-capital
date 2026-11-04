@@ -14,38 +14,87 @@ class MainScene extends Phaser.Scene {
         this.updateDelay = 50;  // Промежуток времени (мс)
 
         this.apples = 0; // Cчет игрока (кол-во яблок)
-        this.age = 21; // Начальный уровень (возраст) игрока
-        this.maxAge = 65; // Уровень (возраст) окончания игры
+        this.ageMin = 10; // Уровень (возраст) в начале игры 
+        this.age = this.ageMin; // Уровень (возраст) игрока
+        this.ageMax = 65; // Уровень (возраст) окончания игры
         this.ageLevelProgress = 0.0; // Прогресс уровня (от 0.0 до 100.0). После перехода на новый уровень сбрасывается на 0.0
-        this.ageLevelGainOnTap = 25.0; // Увеличение прогресса уровня за клик по дереву
+        this.ageLevelGainOnTap = 30.0; // Увеличение прогресса уровня за клик по дереву
         this.ageLevelGainOnDelay = 0.5; // Автоматическое увеличение прогресса уровня за промежуток времени
-        this.isTreeActive = false; // Состояние роста дерева ДНПС (может стать активным только раз, далее состояние не меняется)
+        this.isTreeActive = false; // Состояние роста дерева ДНПС 
         this.isShieldActive = false; // Состояние щита НСЖ
         this.shieldDurationProgress = 100.0 // Прогресс оставшегося действия щита НСЖ (от 100.0 до 0.0)
+        this.taxEventsRemained = 2; // Кол-во событий, связанных с налогами, которое может произойти за игровую сессию
+        this.crisisEventsRemained = 2 // Кол-во событий, связанных с кризисными ситуациями, которое может произойти за игровую сессию
+        this.inflationEventsRemained = 2; // Кол-во событий, связанных с инфляцией яблок
 
         // Кнопки улучшений
         this.btnApple = document.getElementById('income-upgrade-button');
         this.btnShield = document.getElementById('shield-upgrade-button');
 
+        // Хар-ки дерева ДНПС
+        this.treeFertilizingCostPerLevel = 50;
+        this.ageTreeActivation = 0;
+        this.DnpsContributionCount = 0;
+
         // Хар-ки улучшений дохода
         this.incomeLevel = 1;
-        this.incomeLevelUpCost = 500; // Кол-во яблок, необходимое для улучшения дохода
-        this.ageLevelUpBonusApples = 100; // Кол-во яблок, получаемое игроком за новый уровень
+        this.incomeLevelUpCost = 200; // Кол-во яблок, необходимое для улучшения дохода
+        this.ageLevelUpBonusApples = 40; // Кол-во яблок, получаемое игроком за новый уровень
         this.applesGainOnTap = 10; // Кол-во яблок, получаемое игроком за клик по дереву
 
         // Хар-ки улучшений щита НСЖ
         this.shieldLevel = 1;
         this.shieldCostPerLevel = 50;
-        this.shieldLevelUpCost = 500; // Кол-во яблок, необходимое для улучшения щита НСЖ
-        this.shieldDuration = 5 // Продолжительность действия щита (кол-во лет)
-        this.shieldInsurancePayoutPercent = 0.5 // Доля убытков, которая будет возмещена при страховом случае
-        this.shieldCumulativeBonusApples = 200; // Бонус яблок, начисляемый при окончании действия щита НСЖ
+        this.shieldLevelUpCost = 200; // Кол-во яблок, необходимое для улучшения щита НСЖ
+        this.shieldDuration = 10 // Продолжительность действия щита (кол-во лет)
+        this.shieldInsurancePayoutPercent = 0.25 // Доля убытков, которая будет возмещена при страховом случае
+        this.shieldCumulativeBonusApples = this.shieldCostPerLevel * this.shieldDuration + this.shieldDuration * 10; // Бонус яблок, начисляемый при окончании действия щита НСЖ
 
         // Настройки событий нажатия кнопок улучшений
-        if (this.btnApple)
-            this.btnApple.addEventListener('click', () => this.showIncomeUpgradePopup());
-        if (this.btnShield)
-            this.btnShield.addEventListener('click', () => this.showShieldActivationPopup());
+        if (this.btnApple) {
+            this.btnApple.addEventListener('click', () => {
+                if (this.isTreeActive)
+                    this.showIncomeUpgradePopup()
+                else
+                    this.showDnpsActivationPopup();
+            });
+        }
+        this.setAppleButtonAvailablility(false);
+
+        if (this.btnShield) {
+            this.btnShield.addEventListener('click', () => {
+                if (this.isShieldActive)
+                    this.showShieldUpgradePopup()
+                else
+                    this.showShieldActivationPopup();
+            });
+        }
+        this.setShieldButtonAvailablility(false);
+
+    }
+
+    // Метод разблокировки / блокировки кнопки яблок в UI
+    setAppleButtonAvailablility(isAvailable) {
+        if (!this.btnApple) 
+            return;
+
+        if (isAvailable) {
+            this.btnApple.removeAttribute('disabled');
+        } else {
+            this.btnApple.setAttribute('disabled', 'true');
+        }
+    }
+
+    // Метод разблокировки / блокировки кнопки щита в UI
+    setShieldButtonAvailablility(isAvailable) {
+        if (!this.btnShield) 
+            return;
+
+        if (isAvailable) {
+            this.btnShield.removeAttribute('disabled');
+        } else {
+            this.btnShield.setAttribute('disabled', 'true');
+        }
     }
 
     preload() {
@@ -73,6 +122,12 @@ class MainScene extends Phaser.Scene {
         this.load.text('shield-upgrade-icon', 'assets/event-icons/shield_upgrade.svg');
         this.load.text('income-upgrade-icon', 'assets/event-icons/income_upgrade.svg');
         this.load.text('shield-activation-icon', 'assets/event-icons/shield_activation.svg');
+        this.load.text('fertilizer-icon', 'assets/event-icons/fertilizer.svg');
+        this.load.text('tornado-icon', 'assets/event-icons/tornado.svg');
+        this.load.text('torn-bag-icon', 'assets/event-icons/torn_bag.svg');
+        this.load.text('worms-icon', 'assets/event-icons/worms.svg');
+        this.load.text('tree-icon', 'assets/event-icons/tree.svg');
+        this.load.text('start-game-icon', 'assets/event-icons/start_game.svg');
 
         this.load.text('apple-icon', 'assets/hud-icons/apple.svg');
     }
@@ -110,6 +165,8 @@ class MainScene extends Phaser.Scene {
         }
 
         this.updateAge(this.age);
+                
+        this.showWelcomePopup();
     }
 
     pauseGame() {
@@ -133,11 +190,8 @@ class MainScene extends Phaser.Scene {
     }
 
     endGame() {
-        this.scene.pause();
-        alert(`Игра окончена! Ваш итоговый капитал: ${this.apples} яблок!`);
+        this.showEndGamePopup();
     }
-
-
 
 
 
@@ -175,39 +229,95 @@ class MainScene extends Phaser.Scene {
 
     // Добавить прогресс уровня (возраста)
     addAgeLevelProgress(deltaProgress = 0.0) {
+        this.ageLevelProgress += deltaProgress;
+
         if (this.ageLevelProgress >= 100) {
             this.ageLevelUp();
             return;
         }
-        
-        this.ageLevelProgress += deltaProgress;
-        this.uiHandler.updatePlayerAgeBar(this.ageLevelProgress);
+        else {
+            this.uiHandler.updatePlayerAgeBar(this.ageLevelProgress);
+        }
     }
 
     // Поднять уровень (возраст)
     ageLevelUp() {
+        if (this.age >= this.ageMax) {
+            this.showEndGamePopup();
+            return;
+        }
+
         this.updateAge(this.age + 1);
         this.updateApples(this.apples + this.ageLevelUpBonusApples);
         this.ageLevelProgress = 0.0;
 
-        if (this.shieldDurationProgress > 0.0 && this.isShieldActive) {
+        // СЮЖЕТНОЕ СОБЫТИЕ 1: Миф №3 (Ранний старт / Молодость)
+        if (this.age === 13 && !this.isTreeActive) {
+            this.showDnpsActivationPopup();
+            this.setAppleButtonAvailablility(true);
+        }
+
+        // СЮЖЕТНОЕ СОБЫТИЕ 2: Знакомство со Щитом НСЖ (Миф №2)
+        if (this.age === 20 && !this.isShieldActive) {
+            this.showShieldActivationPopup();
+            this.setShieldButtonAvailablility(true);
+        }
+
+        // СЮЖЕТНОЕ СОБЫТИЕ 3 (Миф №6): Середина пути (примерно 40 цикл)
+        // Срабатывает, если дерево ДНПС было актировано ранее
+        if (this.age === 40 && this.isTreeActive) {
+            this.showMidGamePopup();
+        }
+
+        // Рандомное кризисное событие («Налоговые черви»):
+        // Срабатывает случайно в диапазоне от 27 до 50 лет с шансом ~30% при переходе года, если еще не происходило
+        if (this.taxEventsRemained > 0 && this.age >= 27 && this.age <= 50) {
+            if (Math.random() < 0.1) {
+                this.taxEventsRemained -= 1;
+                this.showTaxCrisisPopup();
+            }
+        }
+
+        // Рандомное событие: Торнадо (между 27 и 40 годами)
+        if (this.crisisEventsRemained > 0 && this.age >= 30 && this.age <= 60) {
+            if (Math.random() < 0.1) {
+                this.crisisEventsRemained -= 1;
+                this.showCrisisPopup();
+            }
+        }
+
+        // Рандомное событие: Яблочная инфляция (Миф №1) — между 26 и 50 годами
+        if (this.inflationEventsRemained && this.age >= 32 && this.age <= 50) {
+            if (Math.random() < 0.1) {
+                this.inflationEventsRemained -= 1;
+                this.showInflationCrisisPopup();
+            }
+        }
+
+        if (this.isShieldActive) {
             this.decreaseShieldDurationOnLevelUp();
         }
 
-        switch (this.age) {
-            case 30:
-                this.tree.setTexture('growing-sapling-1');
-                break;
-            case 45:
-                this.tree.setTexture('growing-sapling-2');
-                break;
-            case 55:
-                this.tree.setTexture('strong-tree');
-                break;
-            default:
-                return;
+        if (this.isTreeActive) {
+            this.executeDnpsContribution();
+
+            switch (this.age) {
+                case 30 + (this.ageTreeActivation - this.ageMin):
+                    this.tree.setTexture('growing-sapling-1');
+                    break;
+                case 45 + (this.ageTreeActivation - this.ageMin):
+                    this.tree.setTexture('growing-sapling-2');
+                    break;
+                case 55 + (this.ageTreeActivation - this.ageMin):
+                    this.tree.setTexture('strong-tree');
+                    break;
+                default:
+                    return;
+            }
         }
     }
+
+
 
     // Отобразить попап продолжительности действия щита НСЖ
     showShieldDurationPopup() {
@@ -220,46 +330,62 @@ class MainScene extends Phaser.Scene {
     }
 
     // Активировать щит НСЖ
-    toggleShield(isActive) {
+    toggleShield(isActive, isEarlyExit = false) {
         if (isActive === this.isShieldActive)
             return;
 
         if (isActive) {
             this.shieldDurationProgress = 100.0;
-            this.decreaseShieldDurationOnLevelUp();
+
+            this.uiHandler.updateShieldDurationBar(this.shieldDurationProgress);
+            this.uiHandler.updateShieldDurationRemainCounter(this.shieldDuration * this.shieldDurationProgress / 100);
+            
             this.showShieldDurationPopup();
-            this.btnShield.addEventListener('click', () => this.showShieldUpgradePopup());
         }
         else {
+            let refundApples = this.shieldCumulativeBonusApples * (1 - this.shieldDurationProgress / 100);
+            if (isEarlyExit) {
+                // Штраф за досрочный выход: игрок теряет большую часть накопленного бонуса (выкупная сумма)
+                refundApples *= 0.5;
+            }
+            this.updateApples(this.apples + refundApples);
+
             this.hideShieldDurationPopup();
-            this.btnShield.addEventListener('click', () => this.showShieldActivationPopup());
-            // Логика начисления бонуса при деактивации щита НСЖ
         }
 
         this.isShieldActive = isActive;
         this.shield.visible = isActive;
     }
 
-    // Уменшить длительность щита НСЖ
+    // Уменьшить длительность щита НСЖ
     decreaseShieldDurationOnLevelUp() {
-        this.shieldDurationProgress += -1 / this.shieldDuration * 100;
-        this.uiHandler.updateShieldDurationBar(this.shieldDurationProgress);
-        this.uiHandler.updateShieldDurationRemainCounter(this.shieldDuration * this.shieldDurationProgress / 100);
+        if (this.apples >= this.shieldCostPerLevel) {
+            this.updateApples(this.apples - this.shieldCostPerLevel);
+        } else {
+            this.showShieldEarlyExitPopup(true)
+            return;
+        }
 
-        // Логика проверки баланса игрока и снятия очков за поддержание щита НСЖ (продумать случай нехватки очков)
+        this.shieldDurationProgress += -1 / this.shieldDuration * 100;
 
         if (this.shieldDurationProgress <= 0.0) {
             this.toggleShield(false);
             return;
         }
+        else {
+            this.uiHandler.updateShieldDurationBar(this.shieldDurationProgress);
+            this.uiHandler.updateShieldDurationRemainCounter(this.shieldDuration * this.shieldDurationProgress / 100);
+        }
     }
+
+
 
     // Попап для включения щита НСЖ
     showShieldActivationPopup() {
         let popupShieldUpgrade = {
             title: "Щит НСЖ",
             subtitle: `НСЖ (Накопительное страхование жизни)`,
-            description: "Работает как 2 в 1: защищает сбережения от рисков и увеличивает ваш капитал. Плата взимается за каждый цикл.",
+            description: "Работает как 2 в 1: сохраняет капитал при негативных событиях и гарантированно возвращает накопления с приростом в конце срока. Плата взимается за каждый цикл.",
             
             eventIcon: this.cache.text.get("shield-activation-icon"),
             
@@ -268,8 +394,12 @@ class MainScene extends Phaser.Scene {
             secondaryButtonText: "Позже",
             
             onPrimaryClick: () => {
-                // Логика проверки баланса игрока
-                this.toggleShield(true);
+                if (this.apples >= this.shieldCostPerLevel) {
+                    this.toggleShield(true);
+                } 
+                else {
+                    alert("Недостаточно яблок для активации щита!");
+                }
             },
         };
 
@@ -290,13 +420,26 @@ class MainScene extends Phaser.Scene {
             secondaryButtonText: "Позже",
             
             onPrimaryClick: () => {
-                // Логика проверки баланса игрока
-                // Логика улучшения щита
+                if (this.shieldLevel >= 3) {
+                    alert("Достигнут максимальный уровень щита!");
+                    return;
+                }
+
+                if (this.apples >= this.shieldLevelUpCost) {
+                    this.updateApples(this.apples - this.shieldLevelUpCost);
+                    this.shieldLevel += 1;
+                    this.shieldDuration += 5;
+                    this.shieldLevelUpCost += 250; 
+                } 
+                else {
+                    alert("Недостаточно яблок для улучшения щита!");
+                }
             },
         };
 
         this.uiHandler.showPopup(popupShieldUpgrade);
     }
+
 
     // Попап для улучшения дохода
     showIncomeUpgradePopup() {
@@ -312,11 +455,300 @@ class MainScene extends Phaser.Scene {
             secondaryButtonText: "Позже",
             
             onPrimaryClick: () => {
-                // Логика проверки баланса игрока
-               // Логика улучшения дохода
+                if (this.incomeLevel >= 3) {
+                    alert("Достигнут максимальный уровень дохода!");
+                    return;
+                }
+
+                if (this.apples >= this.incomeLevelUpCost) {
+                    this.updateApples(this.apples - this.incomeLevelUpCost);
+                    this.incomeLevel += 1;
+                    this.ageLevelUpBonusApples += 25;
+                    this.applesGainOnTap += 2;
+                    this.incomeLevelUpCost += 250;
+                } 
+                else {
+                    alert("Недостаточно яблок для улучшения дохода!");
+                }       
             },
         };
 
         this.uiHandler.showPopup(popupShieldUpgrade);
+    }
+
+
+    executeDnpsContribution() {
+        let totalContribution = this.treeFertilizingCostPerLevel;
+        totalContribution += this.isShieldActive ? this.shieldCostPerLevel : 0
+
+        if (this.apples >= totalContribution) {
+            this.updateApples(this.apples - this.treeFertilizingCostPerLevel);
+            this.DnpsContributionCount += 1;
+        } 
+        else if (this.apples >= this.treeFertilizingCostPerLevel) {
+            this.showShieldEarlyExitPopup(true);
+        }
+        else {
+            alert("Недостаточно яблок для ухода за деревом ДНПС!");
+        }
+    }
+
+    // Попап для активации дерева ДНПС (Миф №3 — ранний старт / взносы)
+    showDnpsActivationPopup() {
+        let dnpsPopup = {
+            title: "Первый шаг к капиталу",
+            subtitle: "",
+            description: "Дерево ДНПС (Добровольное накопительное пенсионное страхование) только начинает расти. Приступите к уходу прямо сейчас: ранний старт делает взносы минимальными, а сложный процент за годы взрастит огромный капитал. Плата взимается за каждый цикл.",
+            
+            eventIcon: this.cache.text.get("fertilizer-icon"),
+            
+            primaryButtonText: `Начать удобрять за ${this.treeFertilizingCostPerLevel}`,
+            primaryButtonIcon: this.cache.text.get("apple-icon"),
+            
+            onPrimaryClick: () => {
+                if (this.apples >= this.treeFertilizingCostPerLevel) {
+                    this.isTreeActive = true;
+                    this.ageTreeActivation = this.age;
+                } 
+                else {
+                    alert("Недостаточно яблок для ухода за деревом ДНПС!");
+                }
+            },
+
+            // Доработать логику появления в случае отказа от предложения
+        };
+
+        this.uiHandler.showPopup(dnpsPopup);
+    }
+
+    // Попап кризисного события: Налоговая атака червей (Миф №5)
+    showTaxCrisisPopup() {
+        const taxLoss = Math.floor(this.apples * 0.20);
+        let descriptionText = "";
+        
+        if (this.isShieldActive) {
+            descriptionText = "Благодаря щиту НСЖ ваши накопления и выплаты полностью защищены от налоговых червей!";
+        } else {
+            descriptionText = `Свободные накопления не защищены государственными льготами, вы теряете часть урожая (-${taxLoss} яблок).`;
+            if (this.apples >= taxLoss) {
+                this.updateApples(this.apples - taxLoss);
+            } else {
+                this.updateApples(0);
+            }
+        }
+
+        let taxPopup = {
+            title: "Предупреждение!",
+            subtitle: "Налоговые черви атакуют!",
+            description: descriptionText,
+            
+            eventIcon: this.cache.text.get("worms-icon"),
+            
+            primaryButtonText: "Продолжить",
+
+            onPrimaryClick: () => {
+
+            },
+        };
+
+        this.uiHandler.showPopup(taxPopup);
+    }
+
+    // Попап кризисного события (Торнадо / Засуха)
+    showCrisisPopup() {
+        const baseLoss = Math.floor(this.apples * 0.5);
+        let actualLoss = baseLoss;
+        let description = "";
+        let title = "";
+        let subtitle = "";
+        let iconKey = "";
+        let type = Math.floor(Math.random() * 2);
+
+        if (this.isShieldActive) {
+            actualLoss = Math.floor(baseLoss * (1 - this.shieldInsurancePayoutPercent));
+        }
+
+        if (type === 0) {
+            title = "Предупреждение!";
+            subtitle = "Торнадо повредил ваши запасы!";
+            iconKey = "tornado-icon";
+            
+            if (this.isShieldActive) {
+                description = `Торнадо попытался разорвать ваши яблоки, но щит НСЖ спас ${this.shieldInsurancePayoutPercent * 100}% урожая.\n(-${actualLoss} яблок)`;
+            } else {
+                description = `Торнадо разорвал ваши запасы! Без защиты НСЖ вы несете полные потери.\n(-${actualLoss} яблок)`;
+            }
+        } else if (type === 1) {
+            title = "Предупреждение!";
+            subtitle = "Непредвиденный засушливый сезон!";
+            iconKey = "torn-bag-icon";
+
+            if (this.isShieldActive) {
+                description = `Некоторые запасы ваших яблок были испорчены, но щит НСЖ спас ${this.shieldInsurancePayoutPercent * 100}% урожая.\n(-${actualLoss} яблок)`;
+            } else {
+                description = `Засуха испортила ваши запасы яблок! Без защиты НСЖ вы потеряли весь урожай этого сезона.\n(-${actualLoss} яблок)`;
+            }
+        }
+
+        this.updateApples(this.apples - actualLoss);
+
+        let crisisPopup = {
+            title: title,
+            subtitle: subtitle,
+            description: description,
+            eventIcon: this.cache.text.get(iconKey),
+            
+            primaryButtonText: "Продолжить",
+
+            onPrimaryClick: () => {
+
+            },
+        };
+
+        this.uiHandler.showPopup(crisisPopup);
+    }
+
+    // Попап сюжетного события: Миф №6 (Середина пути / ДНПС)
+    showMidGamePopup() {
+        let midGamePopup = {
+            title: "Середина пути - не время расслабляться!",
+            subtitle: `Вы достигли ${this.age} цикла!`,
+            description: "Кажется, что до финиша еще далеко и можно сделать паузу в накоплениях ДНПС. Но именно сейчас закладывается фундамент вашего будущего капитала - останавливаться нельзя!",
+            
+            eventIcon: this.cache.text.get("tree-icon"),
+            
+            primaryButtonText: "Продолжить вклады",
+            secondaryButtonText: "Сделать паузу",
+            
+            onPrimaryClick: () => {
+                // Игрок делает правильный финансовый выбор:
+                // ДНПС остается активным, сложный процент продолжит работать на полную мощность
+            },
+
+            onSecondaryClick: () => {
+                // Игрок поддается мифу и делает паузу:
+                // Приостанавливаем активный рост ДНПС
+                this.isTreeActive = false;
+            }
+        };
+
+        this.uiHandler.showPopup(midGamePopup);
+    }
+
+    // Попап досрочного расторжения НСЖ (Миф №4)
+    showShieldEarlyExitPopup(isInsufficientFunds = false) {
+        let titleText = "Деактивация щита";
+        let subtitleText = "Досрочное расторжение НСЖ";
+        let descriptionText = "Ваш щит НСЖ (Накопительного страхования жизни) рассчитан на долгий срок. Если забрать средства прямо сейчас, до окончания программы, вы получите лишь выкупную сумму - часть накоплений сгорит, а также придется вернуть полученный налоговый вычет.";
+        
+        let primaryText = "Оставить щит";
+        let secondaryText = "Деактивировать щит с потерями";
+        
+        let hasPrimary = true;
+
+        // Если деактивация происходит из-за нехватки средств для продления
+        if (isInsufficientFunds) {
+            subtitleText = "Досрочное расторжение НСЖ";
+            descriptionText = "Недостаточно яблок для продления действия щита! Программа прекращается досрочно: вы получаете выкупную сумму, часть накоплений сгорает из-за досрочного прекращения взносов.";
+            
+            primaryText = null;
+            secondaryText = "Понятно";
+            hasPrimary = false;
+        }
+
+        let earlyExitPopup = {
+            title: titleText,
+            subtitle: subtitleText,
+            description: descriptionText,
+            
+            eventIcon: this.cache.text.get("shield-activation-icon"),
+            
+            primaryButtonText: primaryText,
+            secondaryButtonText: secondaryText,
+            
+            onPrimaryClick: hasPrimary ? () => {
+                // Игрок принимает правильное решение и оставляет защиту
+            } : null,
+
+            onSecondaryClick: () => {
+                this.toggleShield(false, true);
+            }
+        };
+
+        this.uiHandler.showPopup(earlyExitPopup);
+    }
+
+    // Попап кризисного события: Яблочная инфляция (Миф №1)
+    showInflationCrisisPopup() {
+        const inflationLoss = Math.floor(this.apples * 0.5); // Ущерб от инфляции по макету
+        
+        // Инфляция бьет по свободным яблокам на балансе игрока, 
+        // но средства в ДНПС или под щитом НСЖ защищены индексацией.
+        // Если свободных яблок меньше, списываем сколько есть (до 0).
+        if (this.apples > 0) {
+            this.updateApples(this.apples - inflationLoss);
+        }
+
+        let inflationPopup = {
+            title: "Предупреждение!",
+            subtitle: "Яблочная инфляция!",
+            description: `Часть ваших яблок на счете засохла (-${inflationLoss} яблок). Яблоки вложенные в дерево ДНПС и щит НСЖ не были тронуты, так как защищены индексацией/процентом.`,
+            
+            eventIcon: this.cache.text.get("torn-bag-icon"),
+            
+            primaryButtonText: "Понятно",
+            onPrimaryClick: () => {
+
+            }
+        };
+
+        this.uiHandler.showPopup(inflationPopup);
+    }
+
+
+    // Приветственный экран
+    showWelcomePopup() {
+        let welcomePopup = {
+            title: "Добро пожаловать!",
+            subtitle: "Путь к финансовой независимости",
+            description: "Вам предстоит пройти жизненный путь от 10 до 65 лет. Выращивайте дерево ДНПС, принимайте грамотные финансовые решения, щит НСЖ и свою смекалку, чтобы защитить капитал от кризисов и сформировать надежное будущее!",
+            
+            eventIcon: this.cache.text.get("start-game-icon"),
+            
+            primaryButtonText: "Начать игру",
+            
+            onPrimaryClick: () => {
+
+            }
+        };
+
+        this.uiHandler.showPopup(welcomePopup);
+    }
+
+    // Экран окончания игры
+    showEndGamePopup() {
+        let finalRating = "Отличный результат!";
+        if (this.apples < 3000) {
+            finalRating = "Вам есть к чему стремиться! Попробуйте применить другую тактику финансового планирования.";
+        } else if (this.apples >= 7000) {
+            finalRating = "Великолепно! Вы настоящий мастер финансового планирования!";
+        }
+
+        let victoryPopup = {
+            title: "Игра завершена!",
+            subtitle: `Вы достигли возраста ${this.ageMax} лет!`,
+            description: `Ваш итоговый капитал составил: \n${this.apples} яблок. \n${finalRating}`,
+            
+            eventIcon: this.cache.text.get("income-upgrade-icon"),
+            
+            primaryButtonText: "Начать заново",
+            
+            onPrimaryClick: () => {
+                // Перезапуск текущей сцены
+                this.scene.restart();
+            }
+        };
+
+        this.uiHandler.showPopup(victoryPopup);
     }
 }
