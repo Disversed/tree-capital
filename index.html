@@ -33,7 +33,7 @@
             </div>
             <!-- яблоки -->
             <div class="header-info-block">
-                <h3 class="h3 blue-text right-align-text">Яблоки</h3>
+                <h3 class="h3 blue-text right-align-text">Накопления</h3>
                 <div class="apple-info">
                     <span class="h2 blue-text" id="apple-score">0</span>
                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -106,7 +106,7 @@
         <div class="footer-background"></div>
 
         <!-- Полупопап для купола дерева -->
-        <div class="shield-progress-info hidden" id="shield-duration-popup">
+        <div class="shield-progress-info" id="shield-duration-popup">
             <h3 class="h3 blue-text center-align-text">
                 Щит НСЖ
             </h3>
@@ -118,8 +118,16 @@
             </p>
         </div>
 
+        <!-- Попап подсказки -->
+        <div class="hint-overlay" id="hint-overlay">
+            <div class="hint-box" id="hint-box">
+                <h2 class="h3 blue-text center-align-text">Подсказка</h2>
+                <p class="text center-align-text" id="hint-text">Текст подсказки</p>
+            </div>
+        </div>
+
         <!-- Попап (по умолчанию скрыт) -->
-        <div class="popup-overlay hidden" id="game-popup">
+        <div class="popup-overlay" id="game-popup">
             <div class="popup-container">
                 <!-- Кнопка-крестик -->
                 <button class="close-popup-button" id="popup-close-btn">

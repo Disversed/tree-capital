@@ -129,13 +129,13 @@ window.UIHandler = {
             }
         }
 
-        this.popupOverlay.classList.remove('hidden');
+        this.popupOverlay.classList.add('visible');
     },
 
     // Скрыть попап
     hidePopup() {
         if (this.popupOverlay) {
-            this.popupOverlay.classList.add('hidden');
+            this.popupOverlay.classList.remove('visible');
 
             this.scene.resumeGame();
         }
@@ -145,14 +145,37 @@ window.UIHandler = {
     // Открыть попап продолжительности действия щита НСЖ
     showShieldDurationPopup() {
         if (this.popupShieldDuration) {
-            this.popupShieldDuration.classList.remove('hidden');
+            this.popupShieldDuration.classList.add('visible');
         }
     },
 
     // Скрыть попап продолжительности действия щита НСЖ
     hideShieldDurationPopup() {
         if (this.popupShieldDuration) {
-            this.popupShieldDuration.classList.add('hidden');
+            this.popupShieldDuration.classList.remove('visible');
         }
     },
+
+
+    // Показать подсказку
+    showHint(text) {
+        const overlay = document.getElementById('hint-overlay');
+        const textEl = document.getElementById('hint-text');
+
+        if (textEl) textEl.innerText = text;
+
+        overlay.classList.add('visible');
+
+        overlay.onclick = () => {
+            this.hideHint();
+        };
+    },
+
+    // Скрыть подсказку
+    hideHint() {
+        const overlay = document.getElementById('hint-overlay');
+        if (overlay) {
+            overlay.classList.remove('visible');
+        }
+    }
 };

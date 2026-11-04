@@ -38,16 +38,32 @@
   width: 0%;
   background: var(--stravita-green);
   border-radius: 0 3px 3px 0;
+  transition: width 0.05s linear;
 }
 /* блок с яблоками */
 .apple-info {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: var(--gap-4);
 }
-
+/* анимация счетчика */
+@keyframes pulseScale {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+.text-pulse {
+  animation: pulseScale 0.2s ease-in-out;
+  display: inline-block;
+}
 
 
 /* сама игра - пока заглушка */
@@ -108,21 +124,66 @@
 
 
 
+/* Элементы обучения */
+/* затемнение фона */
+.hint-overlay {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* background: rgba(105, 117, 122, 0.6); */
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 35% 50px;
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease, z-index 0.3s ease;
+}
+.hint-overlay.visible {
+  z-index: 999;
+  opacity: 1;
+  visibility: visible;
+}
+/* карточка подсказки */
+.hint-box {
+  background: var(--stravita-coolgray);
+  border: 2px solid var(--stravita-gray);
+  border-radius: 5px;
+  padding: 20px;
+}
+/* эффект подсветки целевого элемента */
+.spotlight-target {
+  position: relative;
+  z-index: 1000;
+  border-radius: 50%;
+}
+
+
 
 
 /* Полупопап для купола дерева */
 .shield-progress-info {
   position: absolute;
-  z-index: 998;
+  z-index: -1;
   translate: 0 150%;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--gap-8);
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease, z-index 0.3s ease;
 }
-.shield-progress-info.hidden {
-  display: none;
+.shield-progress-info.visible {
+  z-index: 998;
+  opacity: 1;
+  visibility: visible;
 }
 .progress-bar {
   width: 233px;
@@ -135,6 +196,7 @@
   height: 100%;
   background: var(--stravita-green);
   border-radius: 3px;
+  transition: width 0.1s linear;
 }
 
 
@@ -144,7 +206,7 @@
 /* затемнение фона */
 .popup-overlay {
   position: absolute;
-  z-index: 999;
+  z-index: -1;
   inset: 0;
   width: 100%;
   height: 100%;
@@ -155,10 +217,16 @@
   justify-content: center;
   align-items: center;
   padding: 25px;
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease, z-index 0.3s ease;
 }
 /* состояние - попап скрыт */
-.popup-overlay.hidden {
-  display: none;
+.popup-overlay.visible {
+  z-index: 999;
+  opacity: 1;
+  visibility: visible;
 }
 /* само окно попапа */
 .popup-container {

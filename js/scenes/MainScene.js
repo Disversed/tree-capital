@@ -11,7 +11,7 @@ class MainScene extends Phaser.Scene {
         }
 
         // Начальное игровое состояние
-        this.updateDelay = 50;  // Промежуток времени (мс)
+        this.updateDelay = 10;  // Промежуток времени (мс)
 
         this.apples = 0; // Cчет игрока (кол-во яблок)
         this.ageMin = 10; // Уровень (возраст) в начале игры 
@@ -19,7 +19,7 @@ class MainScene extends Phaser.Scene {
         this.ageMax = 65; // Уровень (возраст) окончания игры
         this.ageLevelProgress = 0.0; // Прогресс уровня (от 0.0 до 100.0). После перехода на новый уровень сбрасывается на 0.0
         this.ageLevelGainOnTap = 30.0; // Увеличение прогресса уровня за клик по дереву
-        this.ageLevelGainOnDelay = 0.5; // Автоматическое увеличение прогресса уровня за промежуток времени
+        this.ageLevelGainOnDelay = 0.1; // Автоматическое увеличение прогресса уровня за промежуток времени
         this.isTreeActive = false; // Состояние роста дерева ДНПС 
         this.isShieldActive = false; // Состояние щита НСЖ
         this.shieldDurationProgress = 100.0 // Прогресс оставшегося действия щита НСЖ (от 100.0 до 0.0)
@@ -31,6 +31,10 @@ class MainScene extends Phaser.Scene {
         this.btnApple = document.getElementById('income-upgrade-button');
         this.btnShield = document.getElementById('shield-upgrade-button');
 
+        // Игровые счетчики
+        this.counterApples = document.getElementById('apple-score');
+        this.counterAge = document.getElementById('player-age');
+
         // Хар-ки дерева ДНПС
         this.treeFertilizingCostPerLevel = 50;
         this.ageTreeActivation = 0;
@@ -39,7 +43,7 @@ class MainScene extends Phaser.Scene {
         // Хар-ки улучшений дохода
         this.incomeLevel = 1;
         this.incomeLevelUpCost = 200; // Кол-во яблок, необходимое для улучшения дохода
-        this.ageLevelUpBonusApples = 40; // Кол-во яблок, получаемое игроком за новый уровень
+        this.ageLevelUpBonusApples = 50; // Кол-во яблок, получаемое игроком за новый уровень
         this.applesGainOnTap = 10; // Кол-во яблок, получаемое игроком за клик по дереву
 
         // Хар-ки улучшений щита НСЖ
@@ -47,6 +51,7 @@ class MainScene extends Phaser.Scene {
         this.shieldCostPerLevel = 50;
         this.shieldLevelUpCost = 200; // Кол-во яблок, необходимое для улучшения щита НСЖ
         this.shieldDuration = 10 // Продолжительность действия щита (кол-во лет)
+        this.shieldDurationCurrent = this.shieldDuration // Для отслеживания оставшегося времени
         this.shieldInsurancePayoutPercent = 0.25 // Доля убытков, которая будет возмещена при страховом случае
         this.shieldCumulativeBonusApples = this.shieldCostPerLevel * this.shieldDuration + this.shieldDuration * 10; // Бонус яблок, начисляемый при окончании действия щита НСЖ
 
@@ -117,6 +122,9 @@ class MainScene extends Phaser.Scene {
         this.load.svg('shield', 'assets/shield-sprites/shield.svg', {
             scale: 0.8
         });
+        this.load.svg('apple', 'assets/hud-icons/apple.svg', {
+            scale: 0.8
+        });
 
         // Иконки (svg)
         this.load.text('shield-upgrade-icon', 'assets/event-icons/shield_upgrade.svg');
@@ -146,8 +154,9 @@ class MainScene extends Phaser.Scene {
             this.shield
         ]);
 
-        this.tree.setInteractive();
-        this.tree.on('pointerdown', this.onTreeClicked, this);
+        this.treeContainer.setSize(200, 250); 
+        this.treeContainer.setInteractive();
+        this.treeContainer.on('pointerdown', this.onTreeClicked, this);
 
         // Постепенное автоматическое накопление уровня
         this.time.addEvent({
@@ -196,13 +205,13 @@ class MainScene extends Phaser.Scene {
 
 
     // Событие клика на дерево ДНПС
-    onTreeClicked() {
+    onTreeClicked(pointer) {
         this.tree.setScale(1);
         this.tree.setY(0);
         this.tweens.killTweensOf(this.tree);
 
         this.addAgeLevelProgress(this.ageLevelGainOnTap);
-        this.updateApples(this.apples + this.applesGainOnTap);
+        this.updateApples(this.apples + this.applesGainOnTap, pointer.x, pointer.y - 75);
         
         // Анимация уменьшения/увеличения при клике
         this.tweens.add({
@@ -219,12 +228,63 @@ class MainScene extends Phaser.Scene {
     updateAge(newAge) {
         this.age = newAge;
         this.uiHandler.updatePlayerAge(this.age);
+
+        if (this.counterAge) {
+            this.counterAge.innerText = newAge;
+
+            // Перезапускаем анимацию пульсации
+            this.counterAge.classList.remove('text-pulse');
+            void this.counterAge.offsetWidth;
+            this.counterAge.classList.add('text-pulse');
+        }
     }
 
     // Обновить счет игрока (кол-во яблок)
-    updateApples(newApples) {
+    updateApples(newApples, effectX = 0, effectY = 0) {
+        let appleDiff = newApples - this.apples;
+        if (appleDiff === 0)
+            return;
+
+        let effectSign = '+', effectColor = '#95C22A';
+        if (appleDiff < 0) {
+            effectSign = '';
+            effectColor = '#c2482a';
+        }
+
         this.apples = newApples;
         this.uiHandler.updateApplesCount(newApples);
+
+        if (this.counterApples) {
+            this.counterApples.innerText = newApples;
+            this.counterApples.classList.remove('text-pulse');
+            void this.counterApples.offsetWidth;
+            this.counterApples.classList.add('text-pulse');
+        }
+
+        // Визуальный эффект всплывающего текста над деревом
+        const randomOffsetX = Phaser.Math.Between(-15, 15);
+        const floatText = this.add.text(0, 0, `${effectSign}${appleDiff}`, {
+            fontSize: '30px',
+            color: effectColor,
+            fontStyle: 'bold',
+            fontFamily: 'PT Sans',
+        });
+        const icon = this.add.sprite(floatText.width + 15, 15, 'apple');
+
+        const effectContainer = this.add.container(effectX + randomOffsetX, effectY + 50, [
+            floatText,
+            icon
+        ]);
+
+        this.tweens.add({
+            targets: effectContainer,
+            y: effectContainer.y - 40 + randomOffsetX,
+            alpha: 0,
+            duration: 800,
+            onComplete: () => {
+                effectContainer.destroy();
+            }
+        });
     }
 
     // Добавить прогресс уровня (возраста)
@@ -248,7 +308,7 @@ class MainScene extends Phaser.Scene {
         }
 
         this.updateAge(this.age + 1);
-        this.updateApples(this.apples + this.ageLevelUpBonusApples);
+        this.updateApples(this.apples + this.ageLevelUpBonusApples, 75, 0);
         this.ageLevelProgress = 0.0;
 
         // СЮЖЕТНОЕ СОБЫТИЕ 1: Миф №3 (Ранний старт / Молодость)
@@ -302,10 +362,10 @@ class MainScene extends Phaser.Scene {
             this.executeDnpsContribution();
 
             switch (this.age) {
-                case 30 + (this.ageTreeActivation - this.ageMin):
+                case 25 + (this.ageTreeActivation - this.ageMin):
                     this.tree.setTexture('growing-sapling-1');
                     break;
-                case 45 + (this.ageTreeActivation - this.ageMin):
+                case 40 + (this.ageTreeActivation - this.ageMin):
                     this.tree.setTexture('growing-sapling-2');
                     break;
                 case 55 + (this.ageTreeActivation - this.ageMin):
@@ -336,9 +396,10 @@ class MainScene extends Phaser.Scene {
 
         if (isActive) {
             this.shieldDurationProgress = 100.0;
+            this.shieldDurationCurrent = this.shieldDuration;
 
             this.uiHandler.updateShieldDurationBar(this.shieldDurationProgress);
-            this.uiHandler.updateShieldDurationRemainCounter(this.shieldDuration * this.shieldDurationProgress / 100);
+            this.uiHandler.updateShieldDurationRemainCounter(this.shieldDurationCurrent);
             
             this.showShieldDurationPopup();
         }
@@ -348,7 +409,7 @@ class MainScene extends Phaser.Scene {
                 // Штраф за досрочный выход: игрок теряет большую часть накопленного бонуса (выкупная сумма)
                 refundApples *= 0.5;
             }
-            this.updateApples(this.apples + refundApples);
+            this.updateApples(this.apples + refundApples, this.scale.width - 75, 0);
 
             this.hideShieldDurationPopup();
         }
@@ -360,21 +421,22 @@ class MainScene extends Phaser.Scene {
     // Уменьшить длительность щита НСЖ
     decreaseShieldDurationOnLevelUp() {
         if (this.apples >= this.shieldCostPerLevel) {
-            this.updateApples(this.apples - this.shieldCostPerLevel);
+            this.updateApples(this.apples - this.shieldCostPerLevel, this.scale.width - 75, 0);
         } else {
             this.showShieldEarlyExitPopup(true)
             return;
         }
 
-        this.shieldDurationProgress += -1 / this.shieldDuration * 100;
+        this.shieldDurationCurrent -= 1;
+        this.shieldDurationProgress = this.shieldDurationCurrent / 10 * 100;
 
-        if (this.shieldDurationProgress <= 0.0) {
+        if (this.shieldDurationCurrent <= 0) {
             this.toggleShield(false);
             return;
         }
         else {
             this.uiHandler.updateShieldDurationBar(this.shieldDurationProgress);
-            this.uiHandler.updateShieldDurationRemainCounter(this.shieldDuration * this.shieldDurationProgress / 100);
+            this.uiHandler.updateShieldDurationRemainCounter(this.shieldDurationCurrent);
         }
     }
 
@@ -426,7 +488,7 @@ class MainScene extends Phaser.Scene {
                 }
 
                 if (this.apples >= this.shieldLevelUpCost) {
-                    this.updateApples(this.apples - this.shieldLevelUpCost);
+                    this.updateApples(this.apples - this.shieldLevelUpCost, this.scale.width - 75, 0);
                     this.shieldLevel += 1;
                     this.shieldDuration += 5;
                     this.shieldLevelUpCost += 250; 
@@ -461,7 +523,7 @@ class MainScene extends Phaser.Scene {
                 }
 
                 if (this.apples >= this.incomeLevelUpCost) {
-                    this.updateApples(this.apples - this.incomeLevelUpCost);
+                    this.updateApples(this.apples - this.incomeLevelUpCost, this.scale.width - 75, 0);
                     this.incomeLevel += 1;
                     this.ageLevelUpBonusApples += 25;
                     this.applesGainOnTap += 2;
@@ -482,7 +544,7 @@ class MainScene extends Phaser.Scene {
         totalContribution += this.isShieldActive ? this.shieldCostPerLevel : 0
 
         if (this.apples >= totalContribution) {
-            this.updateApples(this.apples - this.treeFertilizingCostPerLevel);
+            this.updateApples(this.apples - this.treeFertilizingCostPerLevel, this.scale.width - 75, 0);
             this.DnpsContributionCount += 1;
         } 
         else if (this.apples >= this.treeFertilizingCostPerLevel) {
@@ -531,7 +593,7 @@ class MainScene extends Phaser.Scene {
         } else {
             descriptionText = `Свободные накопления не защищены государственными льготами, вы теряете часть урожая (-${taxLoss} яблок).`;
             if (this.apples >= taxLoss) {
-                this.updateApples(this.apples - taxLoss);
+                this.updateApples(this.apples - taxLoss, this.scale.width - 75, 0);
             } else {
                 this.updateApples(0);
             }
@@ -590,7 +652,7 @@ class MainScene extends Phaser.Scene {
             }
         }
 
-        this.updateApples(this.apples - actualLoss);
+        this.updateApples(this.apples - actualLoss, this.scale.width - 75, 0);
 
         let crisisPopup = {
             title: title,
@@ -686,7 +748,7 @@ class MainScene extends Phaser.Scene {
         // но средства в ДНПС или под щитом НСЖ защищены индексацией.
         // Если свободных яблок меньше, списываем сколько есть (до 0).
         if (this.apples > 0) {
-            this.updateApples(this.apples - inflationLoss);
+            this.updateApples(this.apples - inflationLoss, this.scale.width - 75, 0);
         }
 
         let inflationPopup = {
@@ -718,7 +780,7 @@ class MainScene extends Phaser.Scene {
             primaryButtonText: "Начать игру",
             
             onPrimaryClick: () => {
-
+                this.uiHandler.showHint("Нажимайте на дерево, чтобы ускорить процесс и заработать дополнительные яблоки!");
             }
         };
 
