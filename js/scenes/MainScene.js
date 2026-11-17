@@ -14,7 +14,7 @@ class MainScene extends Phaser.Scene {
         this.updateDelay = 10;  // Промежуток времени (мс)
 
         this.apples = 0; // Cчет игрока (кол-во яблок)
-        this.ageMin = 10; // Уровень (возраст) в начале игры 
+        this.ageMin = 18; // Уровень (возраст) в начале игры 
         this.age = this.ageMin; // Уровень (возраст) игрока
         this.ageMax = 65; // Уровень (возраст) окончания игры
         this.ageLevelProgress = 0.0; // Прогресс уровня (от 0.0 до 100.0). После перехода на новый уровень сбрасывается на 0.0
@@ -270,6 +270,8 @@ class MainScene extends Phaser.Scene {
             fontFamily: 'PT Sans',
         });
         const icon = this.add.sprite(floatText.width + 15, 15, 'apple');
+        icon.setTintMode(Phaser.TintModes.FILL);
+        icon.setTint(Phaser.Display.Color.HexStringToColor(effectColor).color)
 
         const effectContainer = this.add.container(effectX + randomOffsetX, effectY + 50, [
             floatText,
@@ -311,46 +313,59 @@ class MainScene extends Phaser.Scene {
         this.updateApples(this.apples + this.ageLevelUpBonusApples, 75, 0);
         this.ageLevelProgress = 0.0;
 
-        // СЮЖЕТНОЕ СОБЫТИЕ 1: Миф №3 (Ранний старт / Молодость)
-        if (this.age === 13 && !this.isTreeActive) {
-            this.showDnpsActivationPopup();
-            this.setAppleButtonAvailablility(true);
+        let eventHandled = false;
+
+        // Сюжетные события
+        switch (this.age) {
+            case 23:
+                if (!this.isTreeActive) {
+                    this.showDnpsActivationPopup();
+                    this.setAppleButtonAvailablility(true);
+                    eventHandled = true;
+                }
+                break;
+
+            case 30:
+                if (!this.isShieldActive) {
+                    this.showShieldActivationPopup();
+                    this.setShieldButtonAvailablility(true);
+                    eventHandled = true;
+                }
+                break;
+
+            case 40:
+                if (this.isTreeActive) {
+                    this.showMidGamePopup();
+                    eventHandled = true;
+                }
+                break;
         }
 
-        // СЮЖЕТНОЕ СОБЫТИЕ 2: Знакомство со Щитом НСЖ (Миф №2)
-        if (this.age === 20 && !this.isShieldActive) {
-            this.showShieldActivationPopup();
-            this.setShieldButtonAvailablility(true);
-        }
+        // Случайные кризисные события
+        if (!eventHandled) {
+            const randomRoll = Math.random();
 
-        // СЮЖЕТНОЕ СОБЫТИЕ 3 (Миф №6): Середина пути (примерно 40 цикл)
-        // Срабатывает, если дерево ДНПС было актировано ранее
-        if (this.age === 40 && this.isTreeActive) {
-            this.showMidGamePopup();
-        }
+            switch (true) {
+                case (this.taxEventsRemained > 0 && this.age >= 31 && this.age <= 50 && 
+                    randomRoll < 0.1 && !eventHandled):
+                    this.taxEventsRemained -= 1;
+                    this.showTaxCrisisPopup();
+                    eventHandled = true;
+                    break;
 
-        // Рандомное кризисное событие («Налоговые черви»):
-        // Срабатывает случайно в диапазоне от 27 до 50 лет с шансом ~30% при переходе года, если еще не происходило
-        if (this.taxEventsRemained > 0 && this.age >= 27 && this.age <= 50) {
-            if (Math.random() < 0.1) {
-                this.taxEventsRemained -= 1;
-                this.showTaxCrisisPopup();
-            }
-        }
+                case (this.crisisEventsRemained > 0 && this.age >= 32 && this.age <= 60 && 
+                    randomRoll < 0.2 && !eventHandled):
+                    this.crisisEventsRemained -= 1;
+                    this.showCrisisPopup();
+                    eventHandled = true;
+                    break;
 
-        // Рандомное событие: Торнадо (между 27 и 40 годами)
-        if (this.crisisEventsRemained > 0 && this.age >= 30 && this.age <= 60) {
-            if (Math.random() < 0.1) {
-                this.crisisEventsRemained -= 1;
-                this.showCrisisPopup();
-            }
-        }
-
-        // Рандомное событие: Яблочная инфляция (Миф №1) — между 26 и 50 годами
-        if (this.inflationEventsRemained && this.age >= 32 && this.age <= 50) {
-            if (Math.random() < 0.1) {
-                this.inflationEventsRemained -= 1;
-                this.showInflationCrisisPopup();
+                case (this.inflationEventsRemained > 0 && this.age >= 33 && this.age <= 50 && 
+                    randomRoll < 0.3 && !eventHandled):
+                    this.inflationEventsRemained -= 1;
+                    this.showInflationCrisisPopup();
+                    eventHandled = true;
+                    break;
             }
         }
 
@@ -361,18 +376,14 @@ class MainScene extends Phaser.Scene {
         if (this.isTreeActive) {
             this.executeDnpsContribution();
 
-            switch (this.age) {
-                case 25 + (this.ageTreeActivation - this.ageMin):
-                    this.tree.setTexture('growing-sapling-1');
-                    break;
-                case 40 + (this.ageTreeActivation - this.ageMin):
-                    this.tree.setTexture('growing-sapling-2');
-                    break;
-                case 55 + (this.ageTreeActivation - this.ageMin):
-                    this.tree.setTexture('strong-tree');
-                    break;
-                default:
-                    return;
+            // Смена текстур дерева (относительно года активации)
+            const yearsPassed = this.age - this.ageTreeActivation;
+            if (yearsPassed === 7) {
+                this.tree.setTexture('growing-sapling-1');
+            } else if (yearsPassed === 18) {
+                this.tree.setTexture('growing-sapling-2');
+            } else if (yearsPassed === 30) {
+                this.tree.setTexture('strong-tree');
             }
         }
     }
@@ -428,7 +439,7 @@ class MainScene extends Phaser.Scene {
         }
 
         this.shieldDurationCurrent -= 1;
-        this.shieldDurationProgress = this.shieldDurationCurrent / 10 * 100;
+        this.shieldDurationProgress = this.shieldDurationCurrent / this.shieldDuration * 100;
 
         if (this.shieldDurationCurrent <= 0) {
             this.toggleShield(false);
@@ -453,15 +464,13 @@ class MainScene extends Phaser.Scene {
             
             primaryButtonText: `Активировать за ${this.shieldCostPerLevel}`,
             primaryButtonIcon: this.cache.text.get("apple-icon"),
+            primaryButtonIsActive: this.apples >= this.shieldCostPerLevel ? true : false,
             secondaryButtonText: "Позже",
             
             onPrimaryClick: () => {
                 if (this.apples >= this.shieldCostPerLevel) {
                     this.toggleShield(true);
                 } 
-                else {
-                    alert("Недостаточно яблок для активации щита!");
-                }
             },
         };
 
@@ -473,17 +482,17 @@ class MainScene extends Phaser.Scene {
         let popupShieldUpgrade = {
             title: "Улучшение щита НСЖ",
             subtitle: `Уровень ${this.shieldLevel} из 3`,
-            description: "Срок действия щита НСЖ (Накопительное страхование жизни) увеличится на 5 игровых лет. Защитите урожай от потерь.",
+            description: this.shieldLevel < 3 ? "Срок действия щита НСЖ (Накопительное страхование жизни) увеличится на 5 игровых лет. Защитите урожай от потерь." : "Достигнут максимальный уровень.",
             
             eventIcon: this.cache.text.get("shield-upgrade-icon"),
             
-            primaryButtonText: `Улучшить за ${this.shieldLevelUpCost}`,
-            primaryButtonIcon: this.cache.text.get("apple-icon"),
-            secondaryButtonText: "Позже",
+            primaryButtonText: this.shieldLevel < 3 ? `Улучшить за ${this.shieldLevelUpCost}` : "Понятно",
+            primaryButtonIcon: this.shieldLevel < 3 ? this.cache.text.get("apple-icon") : "",
+            primaryButtonIsActive: this.apples >= this.shieldLevelUpCost ? true : this.shieldLevel < 3 ? false : true,
+            secondaryButtonText: this.shieldLevel < 3 ? "Позже" : "",
             
             onPrimaryClick: () => {
                 if (this.shieldLevel >= 3) {
-                    alert("Достигнут максимальный уровень щита!");
                     return;
                 }
 
@@ -493,9 +502,6 @@ class MainScene extends Phaser.Scene {
                     this.shieldDuration += 5;
                     this.shieldLevelUpCost += 250; 
                 } 
-                else {
-                    alert("Недостаточно яблок для улучшения щита!");
-                }
             },
         };
 
@@ -508,17 +514,17 @@ class MainScene extends Phaser.Scene {
         let popupShieldUpgrade = {
             title: "Улучшение дохода",
             subtitle: `Уровень ${this.incomeLevel} из 3`,
-            description: "Доход за каждый прожитый цикл увеличивается на 50 яблок.",
+            description: this.incomeLevel < 3 ? "Доход за каждый прожитый цикл увеличивается на 25 яблок." : "Достигнут максимальный уровень.",
             
             eventIcon: this.cache.text.get("income-upgrade-icon"),
             
-            primaryButtonText: `Улучшить за ${this.incomeLevelUpCost}`,
-            primaryButtonIcon: this.cache.text.get("apple-icon"),
-            secondaryButtonText: "Позже",
+            primaryButtonText: this.incomeLevel < 3 ? `Улучшить за ${this.incomeLevelUpCost}` : "Понятно",
+            primaryButtonIcon: this.incomeLevel < 3 ? this.cache.text.get("apple-icon") : "",
+            primaryButtonIsActive: this.apples >= this.incomeLevelUpCost ? true : this.incomeLevel < 3 ? false : true,
+            secondaryButtonText: this.incomeLevel < 3 ? "Позже" : "",
             
             onPrimaryClick: () => {
                 if (this.incomeLevel >= 3) {
-                    alert("Достигнут максимальный уровень дохода!");
                     return;
                 }
 
@@ -528,10 +534,7 @@ class MainScene extends Phaser.Scene {
                     this.ageLevelUpBonusApples += 25;
                     this.applesGainOnTap += 2;
                     this.incomeLevelUpCost += 250;
-                } 
-                else {
-                    alert("Недостаточно яблок для улучшения дохода!");
-                }       
+                }      
             },
         };
 
@@ -559,8 +562,8 @@ class MainScene extends Phaser.Scene {
     showDnpsActivationPopup() {
         let dnpsPopup = {
             title: "Первый шаг к капиталу",
-            subtitle: "",
-            description: "Дерево ДНПС (Добровольное накопительное пенсионное страхование) только начинает расти. Приступите к уходу прямо сейчас: ранний старт делает взносы минимальными, а сложный процент за годы взрастит огромный капитал. Плата взимается за каждый цикл.",
+            subtitle: "ДНПС (Добровольное накопительное пенсионное страхование)",
+            description: "Дерево ДНПС только начинает расти. Приступите к уходу прямо сейчас: ранний старт делает взносы минимальными, а сложный процент за годы взрастит огромный капитал. Плата взимается за каждый цикл.",
             
             eventIcon: this.cache.text.get("fertilizer-icon"),
             
@@ -773,7 +776,7 @@ class MainScene extends Phaser.Scene {
         let welcomePopup = {
             title: "Добро пожаловать!",
             subtitle: "Путь к финансовой независимости",
-            description: "Вам предстоит пройти жизненный путь от 10 до 65 лет. Выращивайте дерево ДНПС, принимайте грамотные финансовые решения, щит НСЖ и свою смекалку, чтобы защитить капитал от кризисов и сформировать надежное будущее!",
+            description: `Вам предстоит пройти жизненный путь от ${this.ageMin} до ${this.ageMax} лет. Выращивайте дерево ДНПС, принимайте грамотные финансовые решения, щит НСЖ и свою смекалку, чтобы защитить капитал от кризисов и сформировать надежное будущее!`,
             
             eventIcon: this.cache.text.get("start-game-icon"),
             

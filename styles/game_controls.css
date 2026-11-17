@@ -292,6 +292,9 @@
   color: var(--white);
   border-radius: 5px;
 }
+.simple-green-button.disabled {
+  filter: grayscale(1);
+}
 
 /* доп для кнопок с иконками внутри */
 .icon-button {

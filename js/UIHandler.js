@@ -86,23 +86,44 @@ window.UIHandler = {
         if (this.popupSubtitle) this.popupSubtitle.innerText = data.subtitle || '';
         if (this.popupDesc) this.popupDesc.innerText = data.description || '';
 
+        if (data.primaryButtonIsActive == null) data.primaryButtonIsActive = true;
+
         // Основная иконка
         if (this.popupEventIcon) {
             this.popupEventIcon.innerHTML = data.eventIcon || '';
         }
 
+        // Флаг для защиты от случайных кликов (изначально кнопки заблокированы)
+        let isPopupInteractive = false;
+        const unlockTimeout = setTimeout(() => {
+            isPopupInteractive = true;
+        }, 500);
+
         // Настройка основной кнопки
+        if (this.popupPrimaryBtn) {
+            if (data.primaryButtonIsActive) {
+                this.popupPrimaryBtn.classList.remove('disabled');
+            }
+            else {
+                this.popupPrimaryBtn.classList.add('disabled');
+            }
+        }
+
         if (this.popupPrimaryBtn && data.onPrimaryClick) {
-            this.popupPrimaryBtn.style.display = 'flex';
             if (this.popupPrimaryBtnText) {
                 this.popupPrimaryBtnText.innerText = data.primaryButtonText || 'Ок';
             }
             
             // Очищаем старые обработчики и вешаем новый
             this.popupPrimaryBtn.onclick = () => {
-                data.onPrimaryClick();
-                if (data.closeOnPrimary !== false) {
-                    this.hidePopup();
+                if (!isPopupInteractive) return;
+                clearTimeout(unlockTimeout);
+
+                if (data.primaryButtonIsActive) {
+                    data.onPrimaryClick();
+                    if (data.closeOnPrimary !== false) {
+                        this.hidePopup();
+                    }
                 }
             };
 
@@ -118,9 +139,11 @@ window.UIHandler = {
         // Настройка второстепенной кнопки
         if (this.popupSecondaryBtn) {
             if (data.secondaryButtonText) {
-                this.popupSecondaryBtn.style.display = 'block';
                 this.popupSecondaryBtn.innerText = data.secondaryButtonText;
                 this.popupSecondaryBtn.onclick = () => {
+                    if (!isPopupInteractive) return;
+                    clearTimeout(unlockTimeout);
+                    
                     if (data.onSecondaryClick) data.onSecondaryClick();
                     this.hidePopup();
                 };
