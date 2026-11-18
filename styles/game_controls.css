@@ -476,3 +476,121 @@
   }
 }
 
+
+
+ /* Финальный экран */
+/* перекрывает всю игру, скроллится, если контент не помещается */
+.result-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    background: var(--white);
+    overflow-y: auto;
+    padding: 32px 24px;
+    display: none;
+}
+/* состояние - экран показан */
+.result-screen.is-open {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-16);
+}
+.result-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-16);
+}
+/* место под фото. Если фото не задано - серая заглушка */
+.result-photo {
+    width: 100%;
+    text-align: center;
+    vertical-align: middle;
+    flex-shrink: 0;
+    margin: var(--gap-16) 0;
+}
+/* карточка с накоплениями */
+.result-savings {
+    background: var(--stravita-coolgray);
+    border-radius: 5px;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-8);
+}
+.result-savings-value {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-8);
+    font: 700 44px/normal var(--PTSans-font);
+    color: var(--stravita-blue);
+}
+.result-share {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--gap-16);
+}
+/* синяя кнопка на всю ширину */
+.blue-button {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--stravita-blue);
+    border: 2px solid var(--stravita-blue);
+    color: var(--white);
+    border-radius: 5px;
+}
+.blue-button:active {
+    background: var(--white);
+    color: var(--stravita-blue);
+}
+/* список ссылок */
+.result-links {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--gap-8);
+}
+.result-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    color: var(--stravita-blue);
+    text-decoration: none;
+    border-bottom: 1px solid var(--stravita-lightgray);
+}
+/* стрелочка › */
+.result-link::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-top: 2px solid var(--stravita-blue);
+    border-right: 2px solid var(--stravita-blue);
+    transform: rotate(45deg);
+    margin-right: 4px;
+}
+
+/* Попап «Поделиться результатом» */
+.share-text {
+    white-space: pre-line; /* перенос строки из SHARE_CONFIG.text */
+}
+.share-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-16);
+    margin-top: var(--gap-16);
+}
+/* кнопки-ссылки соцсетей: стиль берём у .simple-green-button из игры */
+.share-buttons a {
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+}
+/* кнопка «Вернуться к итогам» */
+.blue-border-button {
+    width: 100%;
+    padding: 10px 40px;
+    background: var(--white);
+    border: 2px solid var(--stravita-blue);
+    color: var(--stravita-blue);
+    border-radius: 5px;
+}

@@ -199,7 +199,12 @@ class MainScene extends Phaser.Scene {
     }
 
     endGame() {
-        this.showEndGamePopup();
+        this.pauseGame();
+        if (window.UIHandler && window.UIHandler.showResultScreen) {
+            window.UIHandler.showResultScreen(this.apples);
+        } else {
+            this.showEndGamePopup(); // Запасной вариант
+        }
     }
 
 
@@ -304,14 +309,14 @@ class MainScene extends Phaser.Scene {
 
     // Поднять уровень (возраст)
     ageLevelUp() {
-        if (this.age >= this.ageMax) {
-            this.showEndGamePopup();
-            return;
-        }
-
         this.updateAge(this.age + 1);
         this.updateApples(this.apples + this.ageLevelUpBonusApples, 75, 0);
         this.ageLevelProgress = 0.0;
+
+        if (this.age >= this.ageMax) {
+            this.endGame();
+            return;
+        }
 
         let eventHandled = false;
 
@@ -482,7 +487,7 @@ class MainScene extends Phaser.Scene {
         let popupShieldUpgrade = {
             title: "Улучшение щита НСЖ",
             subtitle: `Уровень ${this.shieldLevel} из 3`,
-            description: this.shieldLevel < 3 ? "Срок действия щита НСЖ (Накопительное страхование жизни) увеличится на 5 игровых лет. Защитите урожай от потерь." : "Достигнут максимальный уровень.",
+            description: this.shieldLevel < 3 ? "Срок действия страховой защиты и гарантий по программе Накопительного страхования жизни (НСЖ) увеличится еще на 5 циклов. Это обеспечит непрерывную защиту вашего накопленного урожая от форс-мажоров." : "Достигнут максимальный уровень.",
             
             eventIcon: this.cache.text.get("shield-upgrade-icon"),
             
@@ -563,7 +568,7 @@ class MainScene extends Phaser.Scene {
         let dnpsPopup = {
             title: "Первый шаг к капиталу",
             subtitle: "ДНПС (Добровольное накопительное пенсионное страхование)",
-            description: "Дерево ДНПС только начинает расти. Приступите к уходу прямо сейчас: ранний старт делает взносы минимальными, а сложный процент за годы взрастит огромный капитал. Плата взимается за каждый цикл.",
+            description: "ДНПС позволяет регулярно откладывать часть средств. Благодаря сложному проценту, ранние взносы со временем превращаются в серьезный пассивный капитал к возрасту зрелости.",
             
             eventIcon: this.cache.text.get("fertilizer-icon"),
             
@@ -776,7 +781,7 @@ class MainScene extends Phaser.Scene {
         let welcomePopup = {
             title: "Добро пожаловать!",
             subtitle: "Путь к финансовой независимости",
-            description: `Вам предстоит пройти жизненный путь от ${this.ageMin} до ${this.ageMax} лет. Выращивайте дерево ДНПС, принимайте грамотные финансовые решения, щит НСЖ и свою смекалку, чтобы защитить капитал от кризисов и сформировать надежное будущее!`,
+            description: `Вам предстоит пройти путь финансового становления. Грамотно распределяйте доходы, используйте инструменты долгосрочных инвестиций и защиты капитала, чтобы защитить свои сбережения от инфляции и кризисов к ${this.ageMax} годам!`,
             
             eventIcon: this.cache.text.get("start-game-icon"),
             
@@ -793,9 +798,9 @@ class MainScene extends Phaser.Scene {
     // Экран окончания игры
     showEndGamePopup() {
         let finalRating = "Отличный результат!";
-        if (this.apples < 3000) {
+        if (this.apples < 1000) {
             finalRating = "Вам есть к чему стремиться! Попробуйте применить другую тактику финансового планирования.";
-        } else if (this.apples >= 7000) {
+        } else if (this.apples >= 2000) {
             finalRating = "Великолепно! Вы настоящий мастер финансового планирования!";
         }
 
